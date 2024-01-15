@@ -1,6 +1,5 @@
 package com.npcmaxhit;
 
-import lombok.AllArgsConstructor;
 import net.runelite.api.NPC;
 import net.runelite.api.Point;
 import net.runelite.client.game.npcoverlay.HighlightedNpc;
