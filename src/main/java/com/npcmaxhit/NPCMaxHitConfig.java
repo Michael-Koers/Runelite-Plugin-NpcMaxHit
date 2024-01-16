@@ -1,23 +1,34 @@
 package com.npcmaxhit;
 
+import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
+import java.awt.*;
+
 @ConfigGroup("npcmaxhit")
 public interface NPCMaxHitConfig extends Config {
     @ConfigItem(
-            keyName = "greeting",
-            name = "Welcome Greeting",
-            description = "The message to show to the user when they login"
+            keyName = "Location",
+            name = "Max hit location",
+            description = "Location on NPC where to show max hit information"
     )
-    default String greeting() {
-        return "Hello";
+    default InfoLocation location() {
+        return InfoLocation.TOP;
+    }
+
+    @ConfigItem(
+            keyName = "Color",
+            name = "Max hit color",
+            description = "Color of the NPC max hit information"
+    )
+    default Color textcolor() {
+        return Color.CYAN;
     }
 
     /**
      * TODO:
-     *  - Remove Text after NPC dies
      *  - More custimization:
      *      - Images vs text vs color
      *  - Caching?

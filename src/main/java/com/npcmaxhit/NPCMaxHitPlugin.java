@@ -6,18 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.NpcDespawned;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @PluginDescriptor(
@@ -39,7 +38,7 @@ public class NPCMaxHitPlugin extends Plugin {
     private OverlayManager overlayManager;
 
     @Getter
-    private final Map<NPC, HighlightedNpc> highlightedNpcs = new HashMap<>();
+    private final Set<NPC> taggedNPCs = new HashSet<>();
 
     @Override
     protected void startUp() {
@@ -49,12 +48,15 @@ public class NPCMaxHitPlugin extends Plugin {
     @Override
     protected void shutDown() {
         overlayManager.remove(npcMaxHitOverlay);
-        this.highlightedNpcs.clear();
+        taggedNPCs.clear();
     }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged gameStateChanged) {
-
+        if (gameStateChanged.getGameState().equals(GameState.HOPPING) ||
+                gameStateChanged.getGameState().equals(GameState.LOGGED_IN)) {
+            taggedNPCs.clear();
+        }
     }
 
     @Subscribe
@@ -76,16 +78,23 @@ public class NPCMaxHitPlugin extends Plugin {
                 .setTarget(event.getTarget())
                 .setIdentifier(event.getIdentifier())
                 .setType(MenuAction.RUNELITE)
-                .onClick((entry) -> this.lookup(entry, npc));
+                .onClick((entry) -> showMaxHit(entry, npc));
     }
 
-    private void lookup(MenuEntry entry, NPC npc) {
-        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Find max hit of: " + npc.getName(), null);
-        this.highlightedNpcs.put(npc, HighlightedNpc.builder()
-                .npc(npc)
-                .name(true)
-                .highlightColor(Color.CYAN)
-                .build());
+    @Subscribe
+    public void onNpcDespawned(NpcDespawned npcDespawned) {
+        taggedNPCs.remove(npcDespawned.getNpc());
+    }
+
+    private void showMaxHit(MenuEntry entry, NPC npc) {
+        System.out.println("Clicked on " + npc.getName() + ": " + npc.getId() + "/" + npc.getIndex());
+
+        if (taggedNPCs.contains(npc)) {
+            taggedNPCs.remove(npc);
+            return;
+        }
+
+        taggedNPCs.add(npc);
     }
 
     @Provides
