@@ -1,6 +1,7 @@
 package com.npcmaxhit;
 
 import com.google.inject.Provides;
+import com.npcmaxhit.wiki.OsrsWikiScraper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -93,6 +94,8 @@ public class NPCMaxHitPlugin extends Plugin {
             taggedNPCs.remove(npc);
             return;
         }
+
+        OsrsWikiScraper.getNpcCombatStats(npc.getName(), npc.getId());
 
         taggedNPCs.add(npc);
     }
