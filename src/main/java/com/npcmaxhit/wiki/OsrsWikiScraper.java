@@ -62,6 +62,7 @@ public class OsrsWikiScraper {
         Document doc = Jsoup.parse(responseBody.string());
         Element infobox = doc.getElementsByClass("infobox-monster").get(0);
 
+        // TODO: Not all Wiki pages use the data-attr-param, need to switch to search by the table header
         return NpcCombatStats.builder()
                 .name(infobox.getElementsByAttributeValue("data-attr-param", "name").text())
                 .combatLevel(Integer.parseInt(infobox.getElementsByAttributeValue("data-attr-param", "combat").text()))

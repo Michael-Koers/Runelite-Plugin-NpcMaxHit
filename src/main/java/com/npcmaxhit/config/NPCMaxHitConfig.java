@@ -30,8 +30,11 @@ public interface NPCMaxHitConfig extends Config {
      * TODO:
      *  - More custimization:
      *      - Images vs text vs color
+     *  - Multiple lines of information
+     *  - InfoBox?
      *  - Caching?
      *  - 1 npc vs all of the same type look up?
      *  - Better DI, cyclomatic dependency between overlay and plugin
+     *  - Switch scraping technique, current doesn't support all wiki pages
      */
 }
