@@ -1,6 +1,8 @@
 package com.npcmaxhit;
 
 import com.google.inject.Provides;
+import com.npcmaxhit.config.NPCMaxHitConfig;
+import com.npcmaxhit.wiki.NpcCombatStats;
 import com.npcmaxhit.wiki.OsrsWikiScraper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +18,11 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @PluginDescriptor(
@@ -30,16 +35,13 @@ public class NPCMaxHitPlugin extends Plugin {
     private Client client;
 
     @Inject
-    private NPCMaxHitConfig config;
-
-    @Inject
     private NPCMaxHitOverlay npcMaxHitOverlay;
 
     @Inject
     private OverlayManager overlayManager;
 
     @Getter
-    private final Set<NPC> taggedNPCs = new HashSet<>();
+    private final Map<NPC, CompletableFuture<NpcCombatStats>> taggedNPCs = new HashMap<>();
 
     @Override
     protected void startUp() {
@@ -90,14 +92,13 @@ public class NPCMaxHitPlugin extends Plugin {
     private void showMaxHit(MenuEntry entry, NPC npc) {
         System.out.println("Clicked on " + npc.getName() + ": " + npc.getId() + "/" + npc.getIndex());
 
-        if (taggedNPCs.contains(npc)) {
+        if (taggedNPCs.containsKey(npc)) {
             taggedNPCs.remove(npc);
             return;
         }
 
-        OsrsWikiScraper.getNpcCombatStats(npc.getName(), npc.getId());
-
-        taggedNPCs.add(npc);
+        CompletableFuture<NpcCombatStats> npcCombatStats = OsrsWikiScraper.getNpcCombatStats(npc.getName(), npc.getId());
+        taggedNPCs.put(npc, npcCombatStats);
     }
 
     @Provides

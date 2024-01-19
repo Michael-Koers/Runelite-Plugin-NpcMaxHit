@@ -1,5 +1,8 @@
 package com.npcmaxhit;
 
+import com.npcmaxhit.config.NPCMaxHitConfig;
+import com.npcmaxhit.wiki.NpcCombatStats;
+import lombok.SneakyThrows;
 import net.runelite.api.NPC;
 import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.Overlay;
@@ -9,6 +12,8 @@ import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class NPCMaxHitOverlay extends Overlay {
 
@@ -23,20 +28,34 @@ public class NPCMaxHitOverlay extends Overlay {
         this.setPosition(OverlayPosition.DYNAMIC);
     }
 
+    @SneakyThrows
     @Override
     public Dimension render(Graphics2D graphics) {
-        for (NPC npc : plugin.getTaggedNPCs()) {
-            renderMaxHitOnNpc(graphics, npc);
+        for (Map.Entry<NPC, CompletableFuture<NpcCombatStats>> npc : plugin.getTaggedNPCs().entrySet()) {
+            if (npc.getValue().isCompletedExceptionally()) {
+                renderTextOnNpc(graphics, npc.getKey(), "Failed to retrieve information from wiki");
+            } else if (npc.getValue().isDone()) {
+                renderMaxHitOnNpc(graphics, npc.getKey(), npc.getValue().get());
+            } else {
+                renderTextOnNpc(graphics, npc.getKey(), "Loading...");
+            }
         }
         return null;
     }
 
-    private void renderMaxHitOnNpc(Graphics2D graphics, NPC npc) {
-        String text = "HIT ME!";
+    private void renderTextOnNpc(Graphics2D graphics, NPC npc, String text) {
         String npcName = Text.removeTags(npc.getName());
-        int zOffset;
+        Point textlocation = npc.getCanvasTextLocation(graphics, npcName, getzOffset(npc));
+        OverlayUtil.renderTextLocation(graphics, textlocation, text, config.textcolor());
+    }
 
+    private void renderMaxHitOnNpc(Graphics2D graphics, NPC npc, NpcCombatStats value) {
+        renderTextOnNpc(graphics, npc, value.getMaxHit().toString());
+    }
+
+    private int getzOffset(NPC npc) {
         // Some Java 11 switch-case statement ugliness
+        int zOffset;
         switch (config.location()) {
             case BOTTOM:
                 zOffset = 0;
@@ -49,8 +68,6 @@ public class NPCMaxHitOverlay extends Overlay {
                 zOffset = npc.getLogicalHeight() + 40;
                 break;
         }
-
-        Point textlocation = npc.getCanvasTextLocation(graphics, npcName, zOffset);
-        OverlayUtil.renderTextLocation(graphics, textlocation, text, config.textcolor());
+        return zOffset;
     }
 }

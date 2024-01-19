@@ -1,6 +1,5 @@
-package com.npcmaxhit;
+package com.npcmaxhit.config;
 
-import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;

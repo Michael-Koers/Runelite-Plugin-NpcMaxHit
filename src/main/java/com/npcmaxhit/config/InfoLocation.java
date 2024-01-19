@@ -1,4 +1,4 @@
-package com.npcmaxhit;
+package com.npcmaxhit.config;
 
 public enum InfoLocation {
     TOP,
