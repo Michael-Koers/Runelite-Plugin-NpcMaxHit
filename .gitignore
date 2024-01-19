@@ -7,3 +7,6 @@ build
 nbactions.xml
 nb-configuration.xml
 nbproject/
+
+# To ignore example HTML's for testing out jsoup
+*.html

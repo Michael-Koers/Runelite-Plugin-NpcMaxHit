@@ -1,7 +1,7 @@
 package com.npcmaxhit.config;
 
 public enum InfoLocation {
-    TOP,
+    ABOVE,
     CENTER,
-    BOTTOM
+    UNDER
 }

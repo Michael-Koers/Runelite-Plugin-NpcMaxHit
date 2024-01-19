@@ -1,14 +1,15 @@
 package com.npcmaxhit.wiki;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 public class OsrsWikiScraper {
 
     private static final String OSRS_WIKI_BASE_URL = "https://oldschool.runescape.wiki/w/";
@@ -48,7 +49,8 @@ public class OsrsWikiScraper {
                             } else {
                                 wikiResponse.complete(parseWikiResponse(responseBody));
                             }
-                        } catch (IOException e){
+                        } catch (IOException e) {
+                            log.error("Error parsing wiki data, request: %n{}%n, error: %n", call.request(), e);
                             wikiResponse.completeExceptionally(new Exception("Failed to read wiki response"));
                         }
                     }
@@ -60,18 +62,24 @@ public class OsrsWikiScraper {
     private static NpcCombatStats parseWikiResponse(ResponseBody responseBody) throws IOException {
 
         Document doc = Jsoup.parse(responseBody.string());
-        Element infobox = doc.getElementsByClass("infobox-monster").get(0);
+        Element infobox = doc.getElementsByClass("infobox-monster").first();
 
-        // TODO: Not all Wiki pages use the data-attr-param, need to switch to search by the table header
         return NpcCombatStats.builder()
-                .name(infobox.getElementsByAttributeValue("data-attr-param", "name").text())
-                .combatLevel(Integer.parseInt(infobox.getElementsByAttributeValue("data-attr-param", "combat").text()))
-                .hitpoints(Integer.parseInt(infobox.getElementsByAttributeValue("data-attr-param", "hitpoints").text()))
+                .name(infobox.getElementsByClass("infobox-header").first().text())
+                .combatLevel(Integer.parseInt(extractHtmlText(infobox, "Combat level")))
                 .attackType(AttackType.MELEE)
-                .maxHit(Integer.parseInt(infobox.getElementsByAttributeValue("data-attr-param", "max_hit_fmt").text()))
-                .aggressive(Boolean.parseBoolean(infobox.getElementsByAttributeValue("data-attr-param", "aggressive").text()))
-                .poisonous(Boolean.parseBoolean(infobox.getElementsByAttributeValue("data-attr-param", "poisonous").text()))
+                .maxHit(Integer.parseInt(extractHtmlText(infobox, "Monster maximum hit")))
+                .aggressive(parseBoolean(extractHtmlText(infobox, "Aggressiveness")))
+                .poisonous(parseBoolean(extractHtmlText(infobox, "Poison")))
                 .build();
 
+    }
+
+    private static String extractHtmlText(Element monsterInfobox, String statTitle) {
+        return monsterInfobox.getElementsByAttributeValue("title", statTitle).first().parent().parent().getElementsByTag("td").text();
+    }
+
+    private static boolean parseBoolean(String booleanText) {
+        return booleanText.equalsIgnoreCase("yes") || booleanText.equalsIgnoreCase("true");
     }
 }

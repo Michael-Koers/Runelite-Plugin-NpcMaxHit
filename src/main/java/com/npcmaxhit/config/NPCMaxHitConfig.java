@@ -14,16 +14,25 @@ public interface NPCMaxHitConfig extends Config {
             description = "Location on NPC where to show max hit information"
     )
     default InfoLocation location() {
-        return InfoLocation.TOP;
+        return InfoLocation.ABOVE;
     }
 
     @ConfigItem(
             keyName = "Color",
-            name = "Max hit color",
-            description = "Color of the NPC max hit information"
+            name = "Information color",
+            description = "Color of the NPC information text"
     )
     default Color textcolor() {
         return Color.CYAN;
+    }
+
+    @ConfigItem(
+            keyName = "Margin",
+            name = "Text margin",
+            description = "Space between NPC information text lines"
+    )
+    default int textmargin() {
+        return 40;
     }
 
     /**

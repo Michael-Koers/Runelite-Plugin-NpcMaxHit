@@ -8,7 +8,6 @@ import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
-import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -33,37 +32,41 @@ public class NPCMaxHitOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         for (Map.Entry<NPC, CompletableFuture<NpcCombatStats>> npc : plugin.getTaggedNPCs().entrySet()) {
             if (npc.getValue().isCompletedExceptionally()) {
-                renderTextOnNpc(graphics, npc.getKey(), "Failed to retrieve information from wiki");
+                renderTextOnNpc(graphics, npc.getKey(), "Failed to reach wiki", getZOffset(npc.getKey()));
             } else if (npc.getValue().isDone()) {
                 renderMaxHitOnNpc(graphics, npc.getKey(), npc.getValue().get());
             } else {
-                renderTextOnNpc(graphics, npc.getKey(), "Loading...");
+                renderTextOnNpc(graphics, npc.getKey(), "Loading...", getZOffset(npc.getKey()));
             }
         }
         return null;
     }
 
-    private void renderTextOnNpc(Graphics2D graphics, NPC npc, String text) {
-        String npcName = Text.removeTags(npc.getName());
-        Point textlocation = npc.getCanvasTextLocation(graphics, npcName, getzOffset(npc));
-        OverlayUtil.renderTextLocation(graphics, textlocation, text, config.textcolor());
+    private void renderTextOnNpc(Graphics2D graphics, NPC npc, String text, int zOffset) {
+        Point textLocation = npc.getCanvasTextLocation(graphics, text, zOffset);
+
+        OverlayUtil.renderTextLocation(graphics, textLocation, text, config.textcolor());
     }
 
     private void renderMaxHitOnNpc(Graphics2D graphics, NPC npc, NpcCombatStats value) {
-        renderTextOnNpc(graphics, npc, value.getMaxHit().toString());
+        // Support for multiple lines
+        int zOffset = getZOffset(npc);
+
+        renderTextOnNpc(graphics, npc, "Attack Style: " + value.getAttackType() + ", max hit: " + value.getMaxHit().toString(), zOffset);
+        renderTextOnNpc(graphics, npc, "Aggressive: " + value.isAggressive() + ", Poisonous: " + value.isPoisonous(), zOffset + config.textmargin());
     }
 
-    private int getzOffset(NPC npc) {
+    private int getZOffset(NPC npc) {
         // Some Java 11 switch-case statement ugliness
         int zOffset;
         switch (config.location()) {
-            case BOTTOM:
-                zOffset = 0;
+            case UNDER:
+                zOffset = -40;
                 break;
             case CENTER:
                 zOffset = npc.getLogicalHeight() / 2;
                 break;
-            case TOP:
+            case ABOVE:
             default:
                 zOffset = npc.getLogicalHeight() + 40;
                 break;
