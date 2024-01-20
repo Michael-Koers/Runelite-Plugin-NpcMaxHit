@@ -52,8 +52,8 @@ public class NPCMaxHitOverlay extends Overlay {
         // Support for multiple lines
         int zOffset = getZOffset(npc);
 
-        renderTextOnNpc(graphics, npc, "Attack Style: " + value.getAttackType() + ", max hit: " + value.getMaxHit().toString(), zOffset);
-        renderTextOnNpc(graphics, npc, "Aggressive: " + value.isAggressive() + ", Poisonous: " + value.isPoisonous(), zOffset + config.textmargin());
+        renderTextOnNpc(graphics, npc, "Aggr.: " + value.isAggressive() + ", poison: " + value.isPoisonous(), zOffset);
+        renderTextOnNpc(graphics, npc, "Style: " + value.getAttackType() + ", max hit: " + value.getMaxHit().toString(), zOffset+ config.textmargin());
     }
 
     private int getZOffset(NPC npc) {

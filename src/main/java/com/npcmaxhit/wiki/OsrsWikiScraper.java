@@ -28,6 +28,8 @@ public class OsrsWikiScraper {
                 .addQueryParameter("name", npcName)
                 .build();
 
+        System.out.println(url);
+
         Request request = new Request.Builder()
                 .get()
                 .url(url)
@@ -67,7 +69,7 @@ public class OsrsWikiScraper {
         return NpcCombatStats.builder()
                 .name(infobox.getElementsByClass("infobox-header").first().text())
                 .combatLevel(Integer.parseInt(extractHtmlText(infobox, "Combat level")))
-                .attackType(AttackType.MELEE)
+                .attackType(extractHtmlText(infobox, "Combat Options"))
                 .maxHit(Integer.parseInt(extractHtmlText(infobox, "Monster maximum hit")))
                 .aggressive(parseBoolean(extractHtmlText(infobox, "Aggressiveness")))
                 .poisonous(parseBoolean(extractHtmlText(infobox, "Poison")))

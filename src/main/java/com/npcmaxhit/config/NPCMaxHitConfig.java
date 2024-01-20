@@ -35,6 +35,7 @@ public interface NPCMaxHitConfig extends Config {
         return 40;
     }
 
+
     /**
      * TODO:
      *  - More custimization:

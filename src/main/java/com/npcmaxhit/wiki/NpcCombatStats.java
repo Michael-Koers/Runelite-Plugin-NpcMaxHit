@@ -16,7 +16,7 @@ public class NpcCombatStats {
     private Integer maxHit;
     private boolean aggressive;
     private boolean poisonous;
-    private AttackType attackType;
+    private String attackType;
     private Map<String, Integer> styleMaxhits;
 
 }
